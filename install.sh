@@ -5,7 +5,7 @@ SKILL_DIR="$HOME/.claude/skills/fable-mode"
 SRC_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 mkdir -p "$SKILL_DIR"
-cp "$SRC_DIR/skills/fable-mode/SKILL.md" "$SRC_DIR/skills/fable-mode/fable-operating-logic.md" "$SRC_DIR/skills/fable-mode/fable-taste-ruby.md" "$SKILL_DIR/"
+cp "$SRC_DIR/skills/fable-mode/SKILL.md" "$SRC_DIR/skills/fable-mode/fable-operating-logic.md" "$SRC_DIR/skills/fable-mode/fable-taste-ruby.md" "$SRC_DIR/skills/fable-mode/fable-exemplars.md" "$SKILL_DIR/"
 
 echo "Installed fable-mode skill to $SKILL_DIR"
 echo ""
