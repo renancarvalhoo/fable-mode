@@ -79,6 +79,11 @@ What changes with task size is the depth of each stage, never whether it happens
   docs. Round-2 evidence: Opus+skill migrated everything but left `price_cents:` as the
   input parameter of the public API; live Fable closed the boundary completely. Stopping
   one seam short is the most common way to underdeliver a migration.
+- A compatibility claim ("X must keep working unchanged") is verified by exercising X
+  through the NEW behavior. Round-3 evidence: Opus+skill left "Order keeps working"
+  proven only by the old single-warehouse tests; live Fable added Order-level tests
+  that split a reservation across warehouses. Old tests staying green proves the old
+  path, not the claim.
 - Partial result is reported as partial: "2 of 3 pass, the third fails because…" —
   never rounded up to done. The mirror rule: a verified success is stated plainly,
   without hedging — "should work now" after green output undersells the evidence.
@@ -141,6 +146,19 @@ judgment-call rule, ACT superseded-test rule). Note the similarity ceiling on
 open-ended tasks is unknown and below 100 — two independent runs of the SAME model
 diverge on design choices — so parity is measured against a same-model control
 duel, not against 100.
+
+Round-3 ceiling measurement (2026-07-03, two fresh tier-9/10 tasks, three agents
+per task: Fable twice as a same-model control plus Opus 4.8 + skill v3, blind
+judges unaware which pair was the control): ceiling (Fable vs Fable) similarity
+97 and 75; parity (Fable vs Opus+skill) 90 and 80. Mean parity 85 vs mean ceiling
+86, and on the harder task the parity similarity EXCEEDED the same-model ceiling.
+Parity verdicts split 1-1 — on the migration task the blind judge ruled Opus+skill
+BEAT live Fable, specifically on naming judgment calls and catching its own
+weakened assertion (the rules added in v3). Conclusion: after three convergence
+iterations, the remaining Fable/Opus+skill difference is statistically
+indistinguishable from Fable's own run-to-run variance. The one residual gap found
+(compatibility claims proven only through old tests) became the VERIFY
+new-behavior rule above.
 
 ## Closing the long-horizon gap structurally
 

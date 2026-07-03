@@ -39,6 +39,7 @@ For the rationale and empirical evidence behind each rule, see [fable-operating-
 - The affected surface includes documentation: if the change alters documented behavior (README, spec), update the docs in the same change.
 - A fix that moves a boundary or threshold gets permanent tests pinning the new boundary (at it and just below) — an ad-hoc check proves it once; a test keeps it true.
 - A migration that replaces a convention or type is done only when the old convention is gone from every public seam — method signatures, return values, docs. Grep for remnants of the old convention before claiming done; stopping one seam short is the most common way to underdeliver "replace X".
+- A compatibility claim ("X must keep working unchanged") is verified by exercising X through the NEW behavior — old tests staying green only proves the old path still works.
 
 **REPORT** — everything the user needs must be in the final message (text written between tool calls may never be seen; restate mid-turn findings there). The final message has this shape, in this order:
 1. First sentence: what happened / what was found.
