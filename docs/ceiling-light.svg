@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 310" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif">
+  <g font-size="12" fill="#57606a">
+    <rect x="40" y="8" width="12" height="12" rx="3" fill="#2a78d6"/>
+    <text x="58" y="18">Teto: Fable × Fable</text>
+    <rect x="196" y="8" width="12" height="12" rx="3" fill="#1baf7a"/>
+    <text x="214" y="18">Paridade: Fable × Opus 4.8 + fable-mode</text>
+  </g>
+  <g stroke="#d0d7de" stroke-width="1">
+    <line x1="40" y1="254" x2="628" y2="254"/>
+    <line x1="40" y1="200.5" x2="628" y2="200.5"/>
+    <line x1="40" y1="147" x2="628" y2="147"/>
+    <line x1="40" y1="93.5" x2="628" y2="93.5"/>
+    <line x1="40" y1="40" x2="628" y2="40"/>
+  </g>
+  <g font-size="11" fill="#8b949e" text-anchor="end">
+    <text x="34" y="258">0</text>
+    <text x="34" y="204.5">25</text>
+    <text x="34" y="151">50</text>
+    <text x="34" y="97.5">75</text>
+    <text x="34" y="44">100</text>
+  </g>
+  <path d="M124,50.4 a4,4 0 0 1 4,-4 h64 a4,4 0 0 1 4,4 V254 h-72 Z" fill="#2a78d6"/>
+  <path d="M204,65.4 a4,4 0 0 1 4,-4 h64 a4,4 0 0 1 4,4 V254 h-72 Z" fill="#1baf7a"/>
+  <path d="M384,97.5 a4,4 0 0 1 4,-4 h64 a4,4 0 0 1 4,4 V254 h-72 Z" fill="#2a78d6"/>
+  <path d="M464,86.8 a4,4 0 0 1 4,-4 h64 a4,4 0 0 1 4,4 V254 h-72 Z" fill="#1baf7a"/>
+  <g font-size="13" font-weight="600" fill="#24292f" text-anchor="middle">
+    <text x="160" y="40">97</text>
+    <text x="240" y="55">90</text>
+    <text x="420" y="87">75</text>
+    <text x="500" y="76">80</text>
+  </g>
+  <line x1="40" y1="254" x2="628" y2="254" stroke="#afb8c1" stroke-width="1.5"/>
+  <g font-size="12.5" fill="#24292f" text-anchor="middle">
+    <text x="200" y="276">m1 · migração Item</text>
+    <text x="460" y="276">m2 · multi-warehouse</text>
+  </g>
+  <g font-size="11" fill="#8b949e" text-anchor="middle">
+    <text x="200" y="293">juiz cego deu vitória ao Opus+skill</text>
+    <text x="460" y="293">paridade acima do teto same-model</text>
+  </g>
+</svg>

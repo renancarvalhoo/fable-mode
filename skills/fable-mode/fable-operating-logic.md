@@ -138,8 +138,13 @@ skill as a VERIFY rule — the convergence loop working as designed.
 Round-2 blind duel, long-horizon regime (2026-07-03, two tier-9/10 tasks: a
 whole-codebase Money migration and a lifecycle redesign with an embedded spec
 conflict): similarity 88/100 on both, two marginal Fable wins. All scenarios and
-reports passed an independent adversarial audit (7/7 valid, all reports accurate,
-all verdicts defensible). The judged gaps were process, not capability: Opus+skill
+reports passed a double adversarial audit — a Sonnet pass (7/7 valid, zero issues)
+and a stricter Fable 5 pass (7/7 valid, verdicts all standing, 11 minor
+non-conclusion-changing nits the Sonnet pass missed, including a small
+overstatement in live Fable's own l1 report). One Fable-audit finding on l2 was a
+harness artifact (a workflow resume re-ran a duelist on a directory already
+containing the first run's solution); the valid l2 data is the first run's,
+audited as faithful. The judged gaps were process, not capability: Opus+skill
 stopped a migration one public seam short, and closed a redesign without naming its
 judgment calls. Both were folded into the skill (VERIFY seam-grep rule, REPORT
 judgment-call rule, ACT superseded-test rule). Note the similarity ceiling on
