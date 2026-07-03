@@ -175,6 +175,33 @@ indistinguishable from Fable's own run-to-run variance. The one residual gap fou
 (compatibility claims proven only through old tests) became the VERIFY
 new-behavior rule above.
 
+## Why this works, per the literature (verified 2026-07)
+
+Deep-research pass over primary sources, each claim adversarially verified 3-0:
+
+- On long-horizon agentic coding, the generational gap between model tiers is
+  dominated by ERROR-CORRECTION AND RELIABILITY, not peak capability: stronger
+  models repeat failed actions ~6x less (METR, arXiv:2503.14499 — GPT-4 38.7%
+  perseverative failures vs o1 6.25%), and every model's dependable-task horizon
+  at 80% success is 4-6x shorter than at 50%. This skill's loop (reproduce,
+  verify per step, one-quick-fix red flag) targets exactly that layer.
+- Mechanistically, base models already possess the reasoning mechanisms of
+  "thinking" models — steering-vector studies recover up to 91% of the
+  base-to-thinking gap with no weight updates; pretraining acquires mechanisms,
+  post-training teaches WHEN to deploy them (Venhoff et al., arXiv:2510.07364).
+  A process skill is a prompt-level substitute for that deployment layer, which
+  explains why parity was reachable by prompting a frontier-scale model.
+- What prompting cannot add: reasoning primitives absent from pretraining (RL
+  itself fails when exposure is ~0% — arXiv:2512.07783) and the residual that
+  survives even the best trace distillation (Orca trails GPT-4 after training
+  on GPT-4's own traces). Weight-level trace distillation genuinely expands a
+  student's boundary (distilled beats base at ALL pass@k — arXiv:2504.13837;
+  72.6 vs 47.0 AIME against direct RL on the same base — DeepSeek-R1), but that
+  route requires training access.
+- Test-time compute buys a further real slice on top: majority voting added ~16
+  points on AIME over an RL-trained model's pass@1 (DeepSeek-R1-Zero) — the
+  quantitative basis for the fable-heavy workflow's best-of-N + judges design.
+
 ## Closing the long-horizon gap structurally
 
 What cannot be prompted into a weaker model is single-context capability: holding a
