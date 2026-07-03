@@ -31,6 +31,8 @@ Mean parity **85** vs mean same-model ceiling **86**. Every win, in both directi
 |---|---|
 | `skills/fable-mode/SKILL.md` | The skill: Fable 5's operating loop — ORIENT → PLAN → ACT → VERIFY → REPORT — as an executable contract, with long-horizon protocol, red flags and common mistakes |
 | `skills/fable-mode/fable-operating-logic.md` | The detailed map: every rule explained, plus the empirical evidence (all four benchmark rounds) behind each one |
+| `skills/fable-mode/fable-taste-ruby.md` | Fable's Ruby design defaults, extracted by behavioral probing (24 forced-choice probes, 3 Fable samples vs 2 Opus) — only the 4 measured divergences need rules |
+| `skills/fable-mode/fable-exemplars.md` | Few-shot cookbook: 6 canonical moves as verbatim diffs and report lines from Fable's duel sides — rules say *what*, exemplars show *the form* |
 | `workflows/fable-heavy.js` | Claude Code Workflow for big tasks: scout → best-of-3 designs → judge panel → synthesized plan → disciplined executor → adversarial reviewers with fix loop |
 | `docs/` | Benchmark charts used above |
 
