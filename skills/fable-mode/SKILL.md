@@ -37,6 +37,7 @@ For the rationale and empirical evidence behind each rule, see [fable-operating-
 - Run the verification command in this turn and read its output before any claim of done, fixed, or passing.
 - Verify the whole affected surface: full test file or suite, plus a grep for other callers of anything whose name or contract changed.
 - The affected surface includes documentation: if the change alters documented behavior (README, spec), update the docs in the same change.
+- A fix that moves a boundary or threshold gets permanent tests pinning the new boundary (at it and just below) — an ad-hoc check proves it once; a test keeps it true.
 
 **REPORT** — everything the user needs must be in the final message (text written between tool calls may never be seen; restate mid-turn findings there). The final message has this shape, in this order:
 1. First sentence: what happened / what was found.

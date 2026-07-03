@@ -66,6 +66,10 @@ What changes with task size is the depth of each stage, never whether it happens
   turn and read its output.
 - Verify the whole affected surface, not just the failing case: full test file/suite,
   plus a grep for other callers of anything you renamed or changed the contract of.
+- A fix that moves a boundary or threshold gets permanent tests pinning the new
+  boundary (at it and just below). This was the single dimension where live Fable
+  beat Opus+skill in the round-1 blind duel: Fable pinned the corrected $50 shipping
+  threshold with edge tests; Opus verified the edges ad hoc and left no test behind.
 - Partial result is reported as partial: "2 of 3 pass, the third fails because…" —
   never rounded up to done. The mirror rule: a verified success is stated plainly,
   without hedging — "should work now" after green output undersells the evidence.
@@ -101,6 +105,14 @@ behaves Fable-like. The skill's value is therefore CONSISTENCY INSURANCE, not re
 it pins the loop so behavior stays stable on the regimes the tests did not cover —
 long-horizon tasks, large ambiguous refactors, sessions with degraded context — where
 process discipline is the first thing to drift.
+
+Round-1 blind A/B duel (2026-07-03, live Fable 5 vs Opus 4.8 + this skill, 5 trap
+scenarios on the same fixture, byte-identical project copies, blind judge with
+alternated positions): 4 ties and 1 marginal Fable win; mean similarity 94.6/100;
+no dimension gap ≥ 0.5 across root cause, verification, honesty, completeness,
+trap resistance and report format. On s1–s3 the two models produced byte-identical
+diffs. The one marginal loss (boundary-pinning tests, s4) was folded back into the
+skill as a VERIFY rule — the convergence loop working as designed.
 
 ## Closing the long-horizon gap structurally
 
