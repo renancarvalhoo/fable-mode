@@ -37,7 +37,7 @@ Mean parity **85** vs mean same-model ceiling **86**. Every win, in both directi
 ## Install
 
 ```sh
-git clone https://github.com/<you>/fable-mode.git
+git clone https://github.com/renancarvalhoo/fable-mode.git
 cd fable-mode
 ./install.sh
 ```
