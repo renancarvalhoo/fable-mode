@@ -12,6 +12,7 @@ Encodes Fable 5's operating loop so any model runs the same process. Capability 
 ORIENT → PLAN → ACT → VERIFY → REPORT
 
 For the rationale and empirical evidence behind each rule, see [fable-operating-logic.md](fable-operating-logic.md).
+When writing Ruby, also apply the measured design defaults in [fable-taste-ruby.md](fable-taste-ruby.md) — they cover the few places where other models' instincts diverge from Fable's.
 
 ## The loop
 

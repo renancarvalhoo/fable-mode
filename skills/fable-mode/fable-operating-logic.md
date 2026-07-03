@@ -152,6 +152,16 @@ open-ended tasks is unknown and below 100 — two independent runs of the SAME m
 diverge on design choices — so parity is measured against a same-model control
 duel, not against 100.
 
+Taste-probe extraction (2026-07-03, 24 forced-choice Ruby design micro-decisions,
+3 independent Fable samples vs 2 pure Opus samples): Fable's atomic defaults are
+24/24 stable across samples — so the whole-task run-to-run variance (ceiling 75
+on m2) is COMPOSITIONAL, not atomic. Opus already matches 20/24 defaults; the 4
+divergences (state transitions raise vs no-op — the exact call that decided the
+l2 duel — value-object derivation ergonomics, setter-chaining, raw-amount
+exposure) are catalogued as applicable rules in fable-taste-ruby.md. Method note:
+extraction was behavioral (sample N times, mine the mode), not introspective —
+model self-reports of reasoning are unreliable; repeated forced choices are not.
+
 Round-3 ceiling measurement (2026-07-03, two fresh tier-9/10 tasks, three agents
 per task: Fable twice as a same-model control plus Opus 4.8 + skill v3, blind
 judges unaware which pair was the control): ceiling (Fable vs Fable) similarity
