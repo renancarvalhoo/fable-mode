@@ -29,7 +29,7 @@ Then wire it in your `~/.claude/CLAUDE.md` so it activates automatically:
 - When running on any model other than Fable (Opus, Sonnet, Haiku), invoke the `fable-mode` skill at the start of any coding task and follow its loop
 ```
 
-For the heavy pipeline, copy `workflows/fable-heavy.js` into your project's `.claude/workflows/`.
+For the heavy pipeline, copy `workflows/fable-heavy.js` into your project's `.claude/workflows/`. The workflow's executor and fixer agents read the fable-mode skill, so it assumes the skill is installed — run `./install.sh` first.
 
 ## Usage
 

@@ -29,12 +29,12 @@ const BRIEF = {
 }
 
 phase('Understand')
-const brief = await agent(
+const brief = (await agent(
   `Scout the current repository to prepare for this task: ${task}${extra}\n` +
     'Read the relevant code (do NOT modify anything). Return: a summary of how the affected area works today, ' +
     'the files involved, the existing patterns/conventions an implementer must follow, and the risks or gotchas.',
   { label: 'scout', schema: BRIEF }
-)
+)) || { summary: 'scout failed — no brief available', files: [], patterns: [], risks: [] }
 
 phase('Design')
 const LENSES = [
@@ -66,12 +66,13 @@ const designs = (
     )
   )
 ).filter(Boolean)
+if (!designs.length) throw new Error('All design agents failed — nothing to judge')
 
 phase('Judge')
 const VERDICT = {
   type: 'object',
   properties: {
-    ranking: { type: 'array', items: { type: 'string' } },
+    ranking: { type: 'array', items: { type: 'string', enum: ['mvp-first', 'risk-first', 'architecture-first'] } },
     reasoning: { type: 'string' },
   },
   required: ['ranking', 'reasoning'],
@@ -83,7 +84,7 @@ const votes = (
         `You are judging ${designs.length} implementation approaches for: ${task}\n` +
           `Judge PRIMARILY by ${criterion}. You may read the code to check claims.\n` +
           `Approaches: ${JSON.stringify(designs)}\n` +
-          'Return a ranking of lens names (best first) and your reasoning.',
+          `Return a ranking of lens names (best first) and your reasoning. Valid lens names — echo them EXACTLY: ${designs.map(d => d.lens).join(', ')}.`,
         { label: `judge:${criterion}`, phase: 'Judge', schema: VERDICT }
       )
     )
@@ -96,7 +97,7 @@ designs.forEach(d => {
 })
 votes.forEach(v =>
   v.ranking.forEach((lens, i) => {
-    if (lens in scores) scores[lens] += v.ranking.length - i
+    if (lens in scores) scores[lens] += designs.length - i
   })
 )
 const winner = designs.slice().sort((a, b) => scores[b.lens] - scores[a.lens])[0]
@@ -118,11 +119,13 @@ const plan = await agent(
     'Return the plan narrative and concrete ordered steps.',
   { label: 'synthesize', phase: 'Judge', schema: PLAN }
 )
+if (!plan) throw new Error('Plan synthesis failed')
 
 phase('Implement')
 const implReport = await agent(
   `Read ${SKILL_PATH} first and follow its loop for everything you do.\n` +
-    'Implement this plan in the repository step by step, verifying each step (run the relevant tests) before the next.\n' +
+    'Implement this plan in the repository step by step, verifying each step (run the relevant tests) before the next. ' +
+    'Do NOT create git commits — leave all changes uncommitted in the working tree.\n' +
     `Task: ${task}${extra}\n` +
     `Plan: ${JSON.stringify(plan)}\n` +
     `Codebase brief: ${JSON.stringify(brief)}\n` +
@@ -162,7 +165,7 @@ for (let pass = 0; pass < 3; pass++) {
     await parallel(
       REVIEWERS.map(([name, focus]) => () =>
         agent(
-          `Adversarially review the uncommitted changes in the repository (git diff + untracked files) made for: ${task}\n` +
+          `Adversarially review the uncommitted changes in the repository (git diff, git diff --cached, and untracked files) made for: ${task}\n` +
             `Focus: ${focus}.\n` +
             'Read the actual code and verify each suspicion before reporting it. ' +
             'Report only real, confirmed issues — return an empty list if the change is clean.',

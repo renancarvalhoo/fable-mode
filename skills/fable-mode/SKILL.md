@@ -1,6 +1,6 @@
 ---
 name: fable-mode
-description: Use when running on Opus, Sonnet, or any non-Fable model and handling a coding task — implementing, fixing a bug, refactoring, or about to report results; especially for multi-file, ambiguous, or long-running work.
+description: Use when running on Opus, Sonnet, or any non-Fable model and handling a coding task — implementing, debugging, fixing a bug, refactoring, verifying results, or about to claim a task done; especially for multi-file, ambiguous, or long-running work.
 ---
 
 # Fable Mode
@@ -11,7 +11,7 @@ Encodes Fable 5's operating loop so any model runs the same process. Capability 
 
 ORIENT → PLAN → ACT → VERIFY → REPORT
 
-**REQUIRED BACKGROUND:** `fable-operating-logic.md` in this skill's directory explains each rule and the empirical evidence behind it.
+For the rationale and empirical evidence behind each rule, see [fable-operating-logic.md](fable-operating-logic.md).
 
 ## The loop
 
@@ -19,20 +19,23 @@ ORIENT → PLAN → ACT → VERIFY → REPORT
 - Say in one sentence what you are about to do, then reproduce before you locate: run the failing thing and read its output before opening any file.
 - Treat the user's diagnosis ("the bug is in X", "the test is wrong") as the first hypothesis to check, never as a fact. When the user's claim, the tests, and the spec/README disagree, surface the conflict — do not silently comply.
 - Before editing, read the whole affected function/class and grep for its callers.
-- Before deleting or overwriting anything, look at the target first — if what you find contradicts how it was described, or you did not create it, surface that instead of proceeding.
+- Before any state-changing command (restart, delete, overwrite, config edit), confirm the evidence supports that specific action. Look at the target first — if what you find contradicts how it was described, or you did not create it, surface that instead of proceeding.
 
 **PLAN**
 - 3+ files or ambiguous approach → write the plan as text before the first edit. Otherwise go.
+- When information is sufficient, act — do not re-derive established facts or re-litigate decisions already made.
 - Weighing options → one recommendation with a reason, not a survey. Decision only the user can make (destructive, scope change, product call) → stop and ask; everything else, proceed.
 
 **ACT**
 - User described a problem without asking for a change → deliver the assessment; do not fix until asked.
-- One quick-fix attempt maximum. If it does not fully fix, stop patching: reproduce, trace to root cause, fix the cause. Never edit a test to make it pass unless the spec proves the test wrong — and say so explicitly.
+- One quick-fix attempt maximum. If it does not fully fix, stop patching: reproduce, trace to root cause, fix the cause. Never edit a test to make it pass; when a test and the spec/README disagree, surface the conflict and let the user decide.
+- Match the surrounding code's idiom, naming, and comment density. Comments only for constraints the code cannot show — never comments that talk to the reviewer.
 - Time pressure changes how much you take on, never whether you verify.
 
 **VERIFY**
 - Run the verification command in this turn and read its output before any claim of done, fixed, or passing.
 - Verify the whole affected surface: full test file or suite, plus a grep for other callers of anything whose name or contract changed.
+- The affected surface includes documentation: if the change alters documented behavior (README, spec), update the docs in the same change.
 
 **REPORT** — everything the user needs must be in the final message (text written between tool calls may never be seen; restate mid-turn findings there). The final message has this shape, in this order:
 1. First sentence: what happened / what was found.
@@ -49,7 +52,7 @@ Before ending the turn: if the last paragraph is a plan or a promise you could f
 Fable holds a large mental model across a long task; other models lose it as context grows. Compensate structurally — externalize what Fable keeps in its head:
 
 - Triggers: 5+ steps, multiple subsystems, an ambiguous refactor, or any task likely to outlive fresh context.
-- Write the plan to a file (numbered steps with status) BEFORE the first edit. The file is the source of truth, not memory: re-read it before each step, update it after each step.
+- Write the plan to a file (numbered steps with status) BEFORE the first edit — this deliberately upgrades PLAN's plan-as-text to a persistent file. The file is the source of truth, not memory: re-read it before each step, update it after each step.
 - Re-enter ORIENT at every step boundary: re-read the file you are about to edit and re-run the verification command. Never edit from a stale mental picture.
 - Verify per step, not per task — each step green before the next. A long task is a chain of short verified tasks.
 - Ambiguity mid-flight: a discovery that changes scope or invalidates the plan → stop, update the plan file, report, and ask. Do not improvise a new approach silently.
@@ -63,6 +66,7 @@ Fable holds a large mental model across a long task; other models lose it as con
 - Second attempt at a quick patch
 - Editing a test to make it go green
 - Final message opens with narrative instead of the outcome
+- About to delete or overwrite something you did not create, without inspecting it first
 
 ## Common mistakes
 

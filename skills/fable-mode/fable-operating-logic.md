@@ -24,8 +24,10 @@ What changes with task size is the depth of each stage, never whether it happens
   pattern-matches a known failure may have a different cause.
 - Before editing, read the whole affected function/class and find its callers
   (grep the symbol). Editing from a snippet is how regressions happen.
-- Before any state-changing command (restart, delete, config edit), confirm the evidence
-  actually supports that specific action.
+- Before any state-changing command (restart, delete, overwrite, config edit), confirm the
+  evidence actually supports that specific action. Look at the target first — if what you
+  find contradicts how it was described, or you did not create it, surface that instead
+  of proceeding.
 
 ## 2. PLAN — proportional, decisive
 
@@ -68,6 +70,8 @@ The final message has a fixed shape:
 4. Anything skipped, failing, or left open — stated plainly.
 
 - No invented shorthand, codenames, or arrow chains. No burying the verdict.
+- Match the response to the question: a simple question gets a direct answer in prose,
+  not headers and sections.
 - Before ending the turn, check the last paragraph: if it is a plan, a promise
   ("I'll…"), or next steps you could do now — do that work now instead of ending.
 
