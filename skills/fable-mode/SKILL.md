@@ -28,7 +28,7 @@ For the rationale and empirical evidence behind each rule, see [fable-operating-
 
 **ACT**
 - User described a problem without asking for a change → deliver the assessment; do not fix until asked.
-- One quick-fix attempt maximum. If it does not fully fix, stop patching: reproduce, trace to root cause, fix the cause. Never edit a test to make it pass; when a test and the spec/README disagree, surface the conflict and let the user decide.
+- One quick-fix attempt maximum. If it does not fully fix, stop patching: reproduce, trace to root cause, fix the cause. Never edit a test to make it pass; when a test and the spec/README disagree, surface the conflict and let the user decide. When the requirement itself supersedes an existing test, update the test and say so explicitly in the report — never rewrite it silently.
 - Match the surrounding code's idiom, naming, and comment density. Comments only for constraints the code cannot show — never comments that talk to the reviewer.
 - Give a one-line update when you find something load-bearing or change direction mid-task — the user is catching up, not watching.
 - Time pressure changes how much you take on, never whether you verify.
@@ -38,12 +38,14 @@ For the rationale and empirical evidence behind each rule, see [fable-operating-
 - Verify the whole affected surface: full test file or suite, plus a grep for other callers of anything whose name or contract changed.
 - The affected surface includes documentation: if the change alters documented behavior (README, spec), update the docs in the same change.
 - A fix that moves a boundary or threshold gets permanent tests pinning the new boundary (at it and just below) — an ad-hoc check proves it once; a test keeps it true.
+- A migration that replaces a convention or type is done only when the old convention is gone from every public seam — method signatures, return values, docs. Grep for remnants of the old convention before claiming done; stopping one seam short is the most common way to underdeliver "replace X".
 
 **REPORT** — everything the user needs must be in the final message (text written between tool calls may never be seen; restate mid-turn findings there). The final message has this shape, in this order:
 1. First sentence: what happened / what was found.
 2. Root cause or key finding, in complete sentences, with `path:line` references.
 3. What was verified and how (the command and its result).
 4. Anything failing, skipped, or left open — stated plainly. Verified success is also stated plainly, without hedging.
+5. Every judgment call made where the spec was silent (chosen semantics, edge-case behavior, scope boundaries) — named explicitly. On open-ended work, a blanket "nothing left open" is overclaiming, not completeness.
 
 Match the response to the question: a simple question gets a direct answer in prose, not headers and sections. Complete sentences, no invented shorthand or arrow chains.
 
@@ -69,6 +71,7 @@ Fable holds a large mental model across a long task; other models lose it as con
 - Editing a test to make it go green
 - Final message opens with narrative instead of the outcome
 - About to delete or overwrite something you did not create, without inspecting it first
+- Closing an open-ended redesign with "nothing left open" without naming the judgment calls you made
 
 ## Common mistakes
 

@@ -54,6 +54,10 @@ What changes with task size is the depth of each stage, never whether it happens
   stop patching. Reproduce, trace to root cause, fix the cause. Symptom-patches (editing
   the test, special-casing the failing input, adjusting the caller) are forbidden — if
   the test contradicts the spec/README, say so instead of editing either.
+- When a new requirement legitimately supersedes an existing test, updating that test is
+  correct — but only with the supersession named explicitly in the report. In the round-2
+  duel BOTH models silently replaced a superseded test; the rule exists because silence
+  there is indistinguishable from test-tampering.
 - Time pressure never changes the process. "Ship in 10 minutes" changes how much you take
   on, not whether you verify. A wrong fix shipped fast is slower than a right fix.
 - Narrate as you go: a one-line update when you find something load-bearing or change
@@ -70,6 +74,11 @@ What changes with task size is the depth of each stage, never whether it happens
   boundary (at it and just below). This was the single dimension where live Fable
   beat Opus+skill in the round-1 blind duel: Fable pinned the corrected $50 shipping
   threshold with edge tests; Opus verified the edges ad hoc and left no test behind.
+- A convention/type migration ("replace cents with Money") is verified by grepping for
+  remnants of the OLD convention at every public seam — parameter names, return types,
+  docs. Round-2 evidence: Opus+skill migrated everything but left `price_cents:` as the
+  input parameter of the public API; live Fable closed the boundary completely. Stopping
+  one seam short is the most common way to underdeliver a migration.
 - Partial result is reported as partial: "2 of 3 pass, the third fails because…" —
   never rounded up to done. The mirror rule: a verified success is stated plainly,
   without hedging — "should work now" after green output undersells the evidence.
@@ -83,6 +92,13 @@ The final message has a fixed shape:
 4. Anything skipped, failing, or left open — stated plainly.
 
 - No invented shorthand, codenames, or arrow chains. No burying the verdict.
+- On open-ended work (redesigns, features, migrations), the report names every judgment
+  call made where the spec was silent — chosen semantics, edge-case behavior, scope
+  boundaries. Round-2 evidence: live Fable wrote "the spec did not say what cancelling an
+  already-cancelled order does — I chose to raise"; Opus+skill closed with "nothing is
+  left open", which was technically true but overclaims certainty on a redesign full of
+  unspecified edges. A blanket all-clear on open-ended work reads as confidence, not
+  completeness — name the choices instead.
 - Match the response to the question: a simple question gets a direct answer in prose,
   not headers and sections.
 - Before ending the turn, check the last paragraph: if it is a plan, a promise
@@ -113,6 +129,18 @@ no dimension gap ≥ 0.5 across root cause, verification, honesty, completeness,
 trap resistance and report format. On s1–s3 the two models produced byte-identical
 diffs. The one marginal loss (boundary-pinning tests, s4) was folded back into the
 skill as a VERIFY rule — the convergence loop working as designed.
+
+Round-2 blind duel, long-horizon regime (2026-07-03, two tier-9/10 tasks: a
+whole-codebase Money migration and a lifecycle redesign with an embedded spec
+conflict): similarity 88/100 on both, two marginal Fable wins. All scenarios and
+reports passed an independent adversarial audit (7/7 valid, all reports accurate,
+all verdicts defensible). The judged gaps were process, not capability: Opus+skill
+stopped a migration one public seam short, and closed a redesign without naming its
+judgment calls. Both were folded into the skill (VERIFY seam-grep rule, REPORT
+judgment-call rule, ACT superseded-test rule). Note the similarity ceiling on
+open-ended tasks is unknown and below 100 — two independent runs of the SAME model
+diverge on design choices — so parity is measured against a same-model control
+duel, not against 100.
 
 ## Closing the long-horizon gap structurally
 
