@@ -1,9 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 310" font-family="system-ui, -apple-system, 'Segoe UI', sans-serif">
   <g font-size="12" fill="#57606a">
     <rect x="40" y="8" width="12" height="12" rx="3" fill="#2a78d6"/>
-    <text x="58" y="18">Teto: Fable × Fable</text>
+    <text x="58" y="18">Ceiling: Fable × Fable</text>
     <rect x="196" y="8" width="12" height="12" rx="3" fill="#1baf7a"/>
-    <text x="214" y="18">Paridade: Fable × Opus 4.8 + fable-mode</text>
+    <text x="214" y="18">Parity: Fable × Opus 4.8 + fable-mode</text>
   </g>
   <g stroke="#d0d7de" stroke-width="1">
     <line x1="40" y1="254" x2="628" y2="254"/>
@@ -31,11 +31,11 @@
   </g>
   <line x1="40" y1="254" x2="628" y2="254" stroke="#afb8c1" stroke-width="1.5"/>
   <g font-size="12.5" fill="#24292f" text-anchor="middle">
-    <text x="200" y="276">m1 · migração Item</text>
-    <text x="460" y="276">m2 · multi-warehouse</text>
+    <text x="200" y="276">m1 · Item migration</text>
+    <text x="460" y="276">m2 · multi-warehouse redesign</text>
   </g>
   <g font-size="11" fill="#8b949e" text-anchor="middle">
-    <text x="200" y="293">juiz cego deu vitória ao Opus+skill</text>
-    <text x="460" y="293">paridade acima do teto same-model</text>
+    <text x="200" y="293">blind judge ruled Opus+skill the winner</text>
+    <text x="460" y="293">parity above the same-model ceiling</text>
   </g>
 </svg>
