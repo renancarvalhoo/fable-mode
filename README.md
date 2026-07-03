@@ -38,13 +38,24 @@ Mean parity **85** vs mean same-model ceiling **86**. Every win, in both directi
 
 ## Install
 
+### As a Claude Code plugin (recommended)
+
+```
+/plugin marketplace add renancarvalhoo/fable-mode
+/plugin install fable-mode@fable-mode
+```
+
+The skill then shows up namespaced as `fable-mode:fable-mode` and updates with the repo.
+
+### Manual
+
 ```sh
 git clone https://github.com/renancarvalhoo/fable-mode.git
 cd fable-mode
 ./install.sh
 ```
 
-Or manually: copy `skills/fable-mode/` into `~/.claude/skills/`.
+Or copy `skills/fable-mode/` into `~/.claude/skills/` yourself (installs as plain `fable-mode`).
 
 Then wire it in your `~/.claude/CLAUDE.md` so it activates automatically:
 

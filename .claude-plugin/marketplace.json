@@ -1,0 +1,15 @@
+{
+  "name": "fable-mode",
+  "description": "Fable 5's coding process for non-Fable models: operating-loop skill, taste catalog, exemplar cookbook and the fable-heavy workflow — benchmark-validated by blind duels.",
+  "owner": {
+    "name": "Renan Carvalho",
+    "url": "https://github.com/renancarvalhoo"
+  },
+  "plugins": [
+    {
+      "name": "fable-mode",
+      "source": "./",
+      "description": "Make Opus 4.8 process code like Claude Fable 5 — Fable's operating loop as an executable skill, proven by blind A/B duels."
+    }
+  ]
+}

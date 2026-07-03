@@ -1,0 +1,13 @@
+{
+  "name": "fable-mode",
+  "version": "1.0.0",
+  "description": "Make Opus 4.8 process code like Claude Fable 5 — Fable's operating loop as an executable skill, proven by blind A/B duels (statistical parity with the same-model ceiling).",
+  "author": {
+    "name": "Renan Carvalho",
+    "url": "https://github.com/renancarvalhoo"
+  },
+  "homepage": "https://github.com/renancarvalhoo/fable-mode",
+  "repository": "https://github.com/renancarvalhoo/fable-mode",
+  "license": "MIT",
+  "keywords": ["claude-code", "agent-skills", "fable", "process-discipline", "benchmark"]
+}
