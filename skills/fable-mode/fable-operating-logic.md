@@ -201,6 +201,24 @@ Deep-research pass over primary sources, each claim adversarially verified 3-0:
 - Test-time compute buys a further real slice on top: majority voting added ~16
   points on AIME over an RL-trained model's pass@1 (DeepSeek-R1-Zero) — the
   quantitative basis for the fable-heavy workflow's best-of-N + judges design.
+- The largest measured inference-time lever on real coding benchmarks is
+  best-of-N with EXECUTION-GROUNDED selection: 15.9%→56% on SWE-bench Lite with
+  verifier-selected sampling (arXiv:2407.21787); 5 samples of a weak model beat
+  1 sample of a frontier model at a third of the cost; CodeMonkeys hit 57.4% on
+  SWE-bench Verified with generated-test voting, where selection quality — not
+  generation — was the binding constraint (oracle 69.8%; selection cost only
+  5.8% of total). Majority voting and LLM/reward-model judging plateau without
+  an external verifier — candidates must be selected by running tests, not by
+  panel opinion.
+- Refinement loops help ONLY when grounded in execution feedback: TextGrad with
+  local test results beats a Reflexion loop (36% vs 31% on LeetCode Hard);
+  intrinsic self-critique without external feedback is the documented failure
+  mode. This is why the skill's VERIFY runs commands and the fable-heavy fix
+  loop feeds reviewers real diffs and test output.
+- Optimized prompt artifacts do NOT transfer across models (up to 50-70%
+  relative loss moving tiers). This skill's rules are semantic process
+  constraints, not optimizer artifacts — but any future GEPA-style optimization
+  pass must be re-run per target model, never copied.
 
 ## Closing the long-horizon gap structurally
 
