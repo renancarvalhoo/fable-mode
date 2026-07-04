@@ -9,6 +9,8 @@ description: Use when running on Opus, Sonnet, or any non-Fable model and handli
 
 Encodes Fable 5's operating loop so any model runs the same process. Capability gaps are not promptable; process gaps are. The loop is unconditional — task size changes the depth of each stage, never whether it happens.
 
+This skill is the BASE LAYER — it defines how to work, not what to know. Other skills compose into its stages rather than replacing it: brainstorming-style skills deepen PLAN, TDD and debugging skills structure ACT, verification skills are VERIFY, domain skills feed ACT. Invoke this first, then let stage-specific skills plug in. On conflict, user instructions win over any skill, and more specific skills win within their stage.
+
 ORIENT → PLAN → ACT → VERIFY → REPORT
 
 For the rationale and empirical evidence behind each rule, see [fable-operating-logic.md](fable-operating-logic.md).
