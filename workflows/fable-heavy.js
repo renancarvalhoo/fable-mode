@@ -1,13 +1,13 @@
 export const meta = {
   name: 'fable-heavy',
-  description: 'Best-of-3 design, judged synthesis, disciplined implementation and adversarial review for big tasks on non-Fable models',
-  whenToUse: 'Large, ambiguous or multi-file coding tasks on Opus/Sonnet where single-pass judgment is not enough',
+  description: 'Best-of-3 design, judged synthesis, disciplined implementation and execution-grounded adversarial review for big tasks on non-Fable models',
+  whenToUse: 'Large, ambiguous or multi-file coding tasks on Opus/Sonnet where single-pass judgment is not enough. Pass {task: "...", bestOf: 2} to have two executors implement independently with test-based selection of the winner (~1.8x cost, for critical tasks).',
   phases: [
     { title: 'Understand', detail: 'scout the codebase for context' },
     { title: 'Design', detail: '3 independent approaches from different lenses' },
     { title: 'Judge', detail: 'panel ranks approaches, synthesize winning plan' },
-    { title: 'Implement', detail: 'execute the plan following the fable-mode loop' },
-    { title: 'Review', detail: 'adversarial reviewers + fix loop' },
+    { title: 'Implement', detail: 'execute the plan following the fable-mode loop; optional best-of-2 with execution-grounded selection' },
+    { title: 'Review', detail: 'adversarial reviewers with executed evidence + fix loop' },
   ],
 }
 
@@ -122,16 +122,72 @@ const plan = await agent(
 if (!plan) throw new Error('Plan synthesis failed')
 
 phase('Implement')
-const implReport = await agent(
+const bestOf = typeof args === 'object' && args && args.bestOf === 2 ? 2 : 1
+const executorPrompt =
   `Read ${SKILL_PATH} first and follow its loop for everything you do.\n` +
-    'Implement this plan in the repository step by step, verifying each step (run the relevant tests) before the next. ' +
-    'Do NOT create git commits — leave all changes uncommitted in the working tree.\n' +
-    `Task: ${task}${extra}\n` +
-    `Plan: ${JSON.stringify(plan)}\n` +
-    `Codebase brief: ${JSON.stringify(brief)}\n` +
-    'Return: files changed, what you verified (commands + results), and anything left open.',
-  { label: 'executor' }
-)
+  'Implement this plan in the repository step by step, verifying each step (run the relevant tests) before the next. ' +
+  'Do NOT create git commits — leave all changes uncommitted in the working tree.\n' +
+  `Task: ${task}${extra}\n` +
+  `Plan: ${JSON.stringify(plan)}\n` +
+  `Codebase brief: ${JSON.stringify(brief)}\n`
+
+let implReport
+if (bestOf === 2) {
+  const IMPL = {
+    type: 'object',
+    properties: { root: { type: 'string' }, report: { type: 'string' } },
+    required: ['root', 'report'],
+  }
+  const candidates = (
+    await parallel(
+      [1, 2].map(n => () =>
+        agent(
+          executorPrompt +
+            'Return: root (the absolute path of your working directory — run pwd) and report (files changed, what you verified with commands + results, anything left open).',
+          { label: `executor:${n}`, phase: 'Implement', isolation: 'worktree', schema: IMPL }
+        )
+      )
+    )
+  ).filter(Boolean)
+  if (!candidates.length) throw new Error('Both executors failed')
+
+  let winning = candidates[0]
+  if (candidates.length === 2) {
+    const PICK = {
+      type: 'object',
+      properties: { winner: { type: 'string', enum: ['A', 'B'] }, evidence: { type: 'string' } },
+      required: ['winner', 'evidence'],
+    }
+    const pick = await agent(
+      `Two independent implementations of the same plan exist in two directories.\n` +
+        `Candidate A: ${candidates[0].root}\nCandidate B: ${candidates[1].root}\n` +
+        `Task: ${task}\nPlan: ${JSON.stringify(plan)}\n` +
+        'Select the winner by EXECUTION EVIDENCE, not code style: run the full test suite in both directories, ' +
+        'then write distinguishing tests (boundaries, error paths and edge cases the plan implies but the suites may not pin) ' +
+        'and run them against BOTH candidates. Prefer the candidate with more passing evidence; break ties toward the smaller, ' +
+        'more convention-matching diff. Clean up any scratch test files you created. Return winner (A or B) and the evidence (commands + outputs that decided it).',
+      { label: 'select:tests', phase: 'Implement', schema: PICK }
+    )
+    if (pick) {
+      winning = pick.winner === 'B' ? candidates[1] : candidates[0]
+      log(`best-of-2 winner: ${pick.winner} — ${pick.evidence.slice(0, 120)}`)
+    }
+  }
+
+  implReport = await agent(
+    `A winning implementation exists in the worktree at ${winning.root}. Transfer it to the current repository's working tree:\n` +
+      `create a patch of ALL its changes (git -C ${winning.root} diff, plus untracked files) and apply it here — do NOT commit.\n` +
+      'Then run the relevant tests in THIS repository and confirm they pass.\n' +
+      `The winning executor's report: ${winning.report}\n` +
+      'Return: files changed, what you verified here (commands + results), and anything left open.',
+    { label: 'apply-winner', phase: 'Implement' }
+  )
+} else {
+  implReport = await agent(
+    executorPrompt + 'Return: files changed, what you verified (commands + results), and anything left open.',
+    { label: 'executor', phase: 'Implement' }
+  )
+}
 
 phase('Review')
 const FINDINGS = {
@@ -156,6 +212,7 @@ const REVIEWERS = [
   ['senior-dev', 'correctness: bugs, N+1 queries, edge cases, missing test coverage'],
   ['product', 'does the change actually fulfill the task as the user asked; behavior and UX gaps'],
   ['architect', 'conventions of this codebase, cohesion, naming, whether the logic lives in the right place'],
+  ['test-hunter', 'write NEW tests targeting the changed behavior (boundaries, error paths, interactions the existing suite does not pin), RUN them, and report only failures proven by execution — include the failing command and its output in the issue; delete your scratch test files afterwards'],
 ]
 
 let openFindings = []
@@ -167,7 +224,7 @@ for (let pass = 0; pass < 3; pass++) {
         agent(
           `Adversarially review the uncommitted changes in the repository (git diff, git diff --cached, and untracked files) made for: ${task}\n` +
             `Focus: ${focus}.\n` +
-            'Read the actual code and verify each suspicion before reporting it. ' +
+            'Read the actual code and verify each suspicion before reporting it — where a suspicion is testable, prove it by running code or tests and cite the output in the issue. ' +
             'Report only real, confirmed issues — return an empty list if the change is clean.',
           { label: `review:${name}`, phase: 'Review', schema: FINDINGS }
         )
@@ -180,7 +237,7 @@ for (let pass = 0; pass < 3; pass++) {
   log(`Review pass ${pass + 1}: ${openFindings.length} findings — fixing`)
   await agent(
     `Read ${SKILL_PATH} first and follow its loop.\n` +
-      `Fix these confirmed review findings in the repository, then re-run the relevant tests and confirm they pass:\n` +
+      `Fix these confirmed review findings in the repository, then prove each fix by execution: re-run the test or command that demonstrated the finding plus the relevant suite, and report the commands with their output — a fix without green output does not count as fixed:\n` +
       JSON.stringify(openFindings),
     { label: `fix:round${fixRounds}`, phase: 'Review' }
   )
