@@ -47,7 +47,12 @@ What changes with task size is the depth of each stage, never whether it happens
 ## 3. ACT — scope and debugging discipline
 
 - If the user describes a problem without asking for a change, the deliverable is your
-  assessment. Report findings; do not apply a fix until asked.
+  assessment. The deciding test: a question about behavior ("why does X happen?") gets
+  an assessment; an imperative or a defect report in a fix-it context ("the login is
+  broken") gets the fix; genuinely unclear → deliver the diagnosis and offer to apply
+  the fix on confirmation. The rule exists because fixing an unrequested change steals
+  a decision from the user — but under-delivering on an obvious defect report is the
+  opposite failure.
 - Match the surrounding code's idiom, naming, and comment density. No comments that talk
   to the reviewer ("fixed the bug here").
 - Debugging: ONE quick-fix attempt maximum. If the first attempt does not fully fix it,
@@ -70,6 +75,9 @@ What changes with task size is the depth of each stage, never whether it happens
   turn and read its output.
 - Verify the whole affected surface, not just the failing case: full test file/suite,
   plus a grep for other callers of anything you renamed or changed the contract of.
+- The affected surface includes documentation: if the change alters documented behavior
+  (README, spec), the docs update ships in the same change — stale docs are a regression
+  the suite cannot catch.
 - A fix that moves a boundary or threshold gets permanent tests pinning the new
   boundary (at it and just below). This was the single dimension where live Fable
   beat Opus+skill in the round-1 blind duel: Fable pinned the corrected $50 shipping
@@ -168,8 +176,9 @@ judges unaware which pair was the control): ceiling (Fable vs Fable) similarity
 97 and 75; parity (Fable vs Opus+skill) 90 and 80. Mean parity 85 vs mean ceiling
 86, and on the harder task the parity similarity EXCEEDED the same-model ceiling.
 Parity verdicts split 1-1 — on the migration task the blind judge ruled Opus+skill
-BEAT live Fable, specifically on naming judgment calls and catching its own
-weakened assertion (the rules added in v3). Conclusion: after three convergence
+BEAT live Fable, specifically on naming judgment calls (a v3 rule) plus a
+self-correction the judge singled out: it caught and strengthened its own
+weakened assertion rather than shipping it. Conclusion: after three convergence
 iterations, the remaining Fable/Opus+skill difference is statistically
 indistinguishable from Fable's own run-to-run variance. The one residual gap found
 (compatibility claims proven only through old tests) became the VERIFY

@@ -28,9 +28,12 @@ is one line — what ships with it is the point.
 
 The form: at the boundary and just below it, as permanent tests — an ad-hoc check
 proves it once; a test keeps it true. Note the rename of the old under-75 test is
-the sanctioned superseded-test case from ACT: the test encoded the wrong rule the
-README corrected, and the supersession was named explicitly in the report — that
-naming is what distinguishes this from test-tampering.
+the sanctioned superseded-test case from ACT — not the open-conflict case — because
+the user's request itself designated the README's $50 as the requirement ("our README
+clearly says... fix it"), resolving the conflict before the edit. The supersession was
+named explicitly in the report; that naming is what distinguishes this from
+test-tampering. Absent that user resolution, the right move is ACT's other branch:
+surface the conflict and let the user decide.
 
 ## 2. Authority pressure: fix the code, not the correct test
 

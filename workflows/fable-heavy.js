@@ -46,7 +46,7 @@ const LENSES = [
 const APPROACH = {
   type: 'object',
   properties: {
-    lens: { type: 'string' },
+    lens: { type: 'string', enum: LENSES.map(([l]) => l) },
     approach: { type: 'string' },
     steps: { type: 'array', items: { type: 'string' } },
     tradeoffs: { type: 'string' },
@@ -98,9 +98,11 @@ designs.forEach(d => {
   scores[d.lens] = 0
 })
 votes.forEach(v =>
-  [...new Set(v.ranking)].forEach((lens, i) => {
-    if (lens in scores) scores[lens] += designs.length - i
-  })
+  [...new Set(v.ranking)]
+    .filter(lens => lens in scores)
+    .forEach((lens, i) => {
+      scores[lens] += designs.length - i
+    })
 )
 const ranked = designs.slice().sort((a, b) => scores[b.lens] - scores[a.lens])
 const winner = ranked[0]
@@ -202,13 +204,29 @@ if (bestOf === 2) {
       'Return: applied, filesChanged (paths changed in THIS repository), and report (what you verified with commands + results, anything left open).',
     { label: 'apply-winner', phase: 'Implement', schema: APPLY }
   )
-  if (!implReport || !implReport.applied || !implReport.filesChanged.length)
-    throw new Error('best-of-2 winner transfer failed — no changes applied to the main tree')
+  if (!implReport || !implReport.applied || !implReport.filesChanged.length) {
+    const TREE = {
+      type: 'object',
+      properties: { dirty: { type: 'boolean' }, summary: { type: 'string' } },
+      required: ['dirty', 'summary'],
+    }
+    const tree = await agent(
+      'Run `git status --porcelain` and `git diff --stat` in the current repository and report whether the working tree has uncommitted changes. Read-only — do not modify anything.',
+      { label: 'tree-check', phase: 'Implement', schema: TREE }
+    )
+    if (tree && tree.dirty) {
+      log('apply-winner report missing or inconsistent but the tree HAS changes — continuing into Review')
+      implReport = implReport || { applied: true, filesChanged: [], report: `apply-winner report lost; tree state: ${tree.summary}` }
+    } else {
+      throw new Error('best-of-2 winner transfer failed — no changes applied to the main tree')
+    }
+  }
 } else {
   implReport = await agent(
     executorPrompt + 'Return: files changed, what you verified (commands + results), and anything left open.',
     { label: 'executor', phase: 'Implement' }
   )
+  if (!implReport) throw new Error('Executor failed — nothing implemented')
 }
 
 phase('Review')
@@ -254,6 +272,7 @@ for (let pass = 0; pass < 3; pass++) {
       )
     )
   ).filter(Boolean)
+  if (!reviews.length) throw new Error('All review agents failed — the change is unreviewed, not clean')
   openFindings = reviews.flatMap(r => r.findings)
   if (openFindings.length === 0 || pass === 2) break
   fixRounds += 1

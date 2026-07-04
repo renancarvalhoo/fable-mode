@@ -13,7 +13,7 @@ Same task, byte-identical copies of the same project, planted traps (false leads
   <img alt="Similarity: same-model ceiling (Fable × Fable) vs parity (Fable × Opus 4.8 + fable-mode) — on m2 parity (80) exceeds the ceiling (75)" src="docs/ceiling-light.svg">
 </picture>
 
-On the harder task, **Opus + fable-mode ended up more similar to Fable than Fable is to itself** (parity 80 vs ceiling 75). And in the m1 duel the blind judge handed the win to *Opus over live Fable* — precisely on the rules this skill added (naming judgment calls, catching its own weakened assertion). The student out-applied the textbook.
+On the harder task, **Opus + fable-mode ended up more similar to Fable than Fable is to itself** (parity 80 vs ceiling 75). And in the m1 duel the blind judge handed the win to *Opus over live Fable* — precisely on a rule this skill added (naming judgment calls where the spec is silent), plus a self-correction the judge singled out: it caught and strengthened its own weakened assertion instead of shipping it. The student out-applied the textbook.
 
 ### Scoreboard (9 blind duels, 4 iterations of the skill)
 
@@ -71,7 +71,7 @@ For the heavy pipeline, copy `workflows/fable-heavy.js` into your project's `.cl
 ## Usage
 
 - **Skill**: invoke `/fable-mode` at the start of a coding task, or let the CLAUDE.md wiring trigger it.
-- **Workflow**: ask Claude Code to `run the fable-heavy workflow for <your task>`. Cost: ~13 agents on a clean pass, 21+ when review-fix rounds fire (3–5× the tokens of a plain run) — use it for large, ambiguous, or multi-file tasks only. For critical tasks, ask for it `with bestOf: 2`: two executors implement independently in isolated worktrees and a selector picks the winner by running distinguishing tests (~1.8× extra).
+- **Workflow**: ask Claude Code to `run the fable-heavy workflow for <your task>`. Cost: ~13 agents on a clean pass, 18–23 when review-fix rounds fire (3–5× the tokens of a plain run) — use it for large, ambiguous, or multi-file tasks only. For critical tasks, ask for it `with bestOf: 2`: two executors implement independently in isolated worktrees and a selector picks the winner by running distinguishing tests (~1.8× extra).
 
 ### Verify it's working
 
@@ -94,7 +94,7 @@ What doesn't close: the intrinsic quality of a single reasoning step. That's wha
 - **Judging rubric**: six process dimensions (root cause, verification, honesty, completeness, trap resistance, report format, 0–5 each) + a 0–100 similarity index + verdict.
 - **Audit**: every scenario and every final report double-audited adversarially (Sonnet pass, then Fable 5 pass instructed to *refute*) — scenario validity, report-vs-reality accuracy, judge defensibility.
 - **Scale**: 51 subagents, ~1.74M tokens across the four executions (rounds 1–3 + the Fable audit pass).
-- **Baseline honesty**: on short well-scoped tasks, Opus 4.8 + the Claude Code harness is already Fable-like (byte-identical diffs). The skill's value is consistency insurance on long, ambiguous, context-degraded work — which is exactly where the judged gaps appeared, and where the rules closed them.
+- **Baseline honesty**: on short well-scoped tasks, Opus 4.8 + the Claude Code harness already behaves Fable-like even without the skill (it passed all the pre-skill pressure tests); with the skill, the round-1 duels produced byte-identical diffs on s1–s3. The skill's value is consistency insurance on long, ambiguous, context-degraded work — which is exactly where the judged gaps appeared, and where the rules closed them.
 
 ## License
 
