@@ -59,6 +59,7 @@ Before ending the turn: if the last paragraph is a plan or a promise you could f
 Fable holds a large mental model across a long task; other models lose it as context grows. Compensate structurally — externalize what Fable keeps in its head:
 
 - Triggers: 5+ steps, multiple subsystems, an ambiguous refactor, or any task likely to outlive fresh context.
+- When two or more triggers stack AND the design itself is contested (more than one defensible approach), do not resolve it with a single reasoning pass: if the project has the `fable-heavy` workflow installed (`.claude/workflows/fable-heavy.js`), tell the user this task fits it and offer to run it — 3 independent designs, a judge panel, a disciplined executor and adversarial reviewers replace single-pass judgment. Solo execution with this loop remains the fallback.
 - Write the plan to a file (numbered steps with status) BEFORE the first edit — this deliberately upgrades PLAN's plan-as-text to a persistent file. The file is the source of truth, not memory: re-read it before each step, update it after each step.
 - Re-enter ORIENT at every step boundary: re-read the file you are about to edit and re-run the verification command. Never edit from a stale mental picture.
 - Verify per step, not per task — each step green before the next. A long task is a chain of short verified tasks.
