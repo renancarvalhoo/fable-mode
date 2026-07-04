@@ -18,6 +18,10 @@ are often post-hoc); behavioral sampling with mode-mining is not.
 
 ## Divergences — apply these defaults (Opus's instinct differs)
 
+These are defaults for NEW code and for choices the codebase has not already
+made. An established convention in the surrounding code wins over any default
+below — follow it, and flag the divergence in the report if it matters.
+
 1. **Invalid state transitions raise; they are never silent no-ops.**
    `cancel!` on an already-cancelled order raises `InvalidState`. The bang
    signals raise-on-failure, and a redundant transition usually hides a caller

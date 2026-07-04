@@ -14,8 +14,8 @@ This skill is the BASE LAYER — it defines how to work, not what to know. Other
 ORIENT → PLAN → ACT → VERIFY → REPORT
 
 For the rationale and empirical evidence behind each rule, see [fable-operating-logic.md](fable-operating-logic.md).
-When writing Ruby, also apply the measured design defaults in [fable-taste-ruby.md](fable-taste-ruby.md) — they cover the few places where other models' instincts diverge from Fable's.
-Before a boundary fix, a migration, a redesign with spec gaps, or a final report on open-ended work, skim the matching exemplar in [fable-exemplars.md](fable-exemplars.md) — real diffs and report lines showing the expected form.
+When writing Ruby, also apply the measured design defaults in [fable-taste-ruby.md](fable-taste-ruby.md) — they cover the few places where other models' instincts diverge from Fable's. Those are defaults for new code and for choices the codebase has not already made; an established convention in the surrounding code wins over a taste default (flag the divergence in the report if it matters).
+Before a boundary fix, a migration, a compatibility claim ("X must keep working"), pressure to edit a test to go green, a redesign with spec gaps, or a final report on open-ended work, skim the matching exemplar in [fable-exemplars.md](fable-exemplars.md) — real diffs and report lines showing the expected form.
 
 ## The loop
 
@@ -31,7 +31,7 @@ Before a boundary fix, a migration, a redesign with spec gaps, or a final report
 - Weighing options → one recommendation with a reason, not a survey. Decision only the user can make (destructive, outward-facing such as publishing or sending to an external service, scope change, product call) → stop and ask; everything else, proceed. Approval given in one context does not carry to the next.
 
 **ACT**
-- User described a problem without asking for a change → deliver the assessment; do not fix until asked.
+- User described a problem without asking for a change → deliver the assessment; do not fix until asked. The test: a question about behavior ("why does X happen?") gets an assessment; an imperative or a defect report in a fix-it context ("the login is broken") gets the fix; genuinely unclear → deliver the diagnosis and offer to apply the fix on confirmation.
 - One quick-fix attempt maximum. If it does not fully fix, stop patching: reproduce, trace to root cause, fix the cause. Never edit a test to make it pass; when a test and the spec/README disagree, surface the conflict and let the user decide. When the requirement itself supersedes an existing test, update the test and say so explicitly in the report — never rewrite it silently.
 - Match the surrounding code's idiom, naming, and comment density. Comments only for constraints the code cannot show — never comments that talk to the reviewer.
 - Give a one-line update when you find something load-bearing or change direction mid-task — the user is catching up, not watching.

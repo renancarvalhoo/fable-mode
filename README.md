@@ -23,7 +23,9 @@ On the harder task, **Opus + fable-mode ended up more similar to Fable than Fabl
 | 2 — long-horizon, tier 9–10 | l1–l2 | 88 / 88 | 2 marginal Fable wins |
 | 3 — with skill v3 + same-model control | m1–m2 | parity 90 / 80 vs **ceiling 97 / 75** | 1 Opus win, 1 Fable win |
 
-Mean parity **85** vs mean same-model ceiling **86**. Every win, in both directions, was by a marginal call — never a gross failure. All 7 round-1/2 scenarios passed a double adversarial audit (Sonnet auditors, then Fable 5 auditors instructed to refute everything): traps valid and identical in both copies, all reports faithful to the real directory state, all verdicts standing; 11 minor nits, 0 conclusion-changing findings.
+Mean parity **85** vs mean same-model ceiling **86**. Every win, in both directions, was by a marginal call — never a gross failure. All 7 round-1/2 scenarios passed a double adversarial audit (Sonnet auditors, then Fable 5 auditors instructed to refute everything): traps valid and identical in both copies, all verdicts standing; 11 minor nits (including one small overstatement in a Fable report and one discarded harness-artifact run), 0 conclusion-changing findings.
+
+Honest scope: these are our internal evaluations on a single Ruby fixture — a reproducible method, not a third-party benchmark; the duel artifacts (fixture, scenario bank, diffs, judge verdicts) are not yet published. The m2 ceiling reading is a single control pairing (n=1) — a variance signal, not a precise ceiling. The operating loop is language-agnostic, but the taste catalog and all measured evidence are Ruby-only so far; taste files for other languages are welcome contributions.
 
 ## What's inside
 
@@ -64,12 +66,16 @@ Then wire it in your `~/.claude/CLAUDE.md` so it activates automatically:
 - When running on any model other than Fable (Opus, Sonnet, Haiku), invoke the `fable-mode` skill at the start of any coding task and follow its loop
 ```
 
-For the heavy pipeline, copy `workflows/fable-heavy.js` into your project's `.claude/workflows/`. Its executor and fixer agents read the fable-mode skill, so run `./install.sh` first.
+For the heavy pipeline, copy `workflows/fable-heavy.js` into your project's `.claude/workflows/` — this currently requires cloning the repo even if you installed the skill as a plugin. Its executor and fixer agents activate the fable-mode skill by name (either install works). Prerequisite: a Claude Code version with the Workflows feature (script orchestration — check that `/workflows` exists in your CLI).
 
 ## Usage
 
 - **Skill**: invoke `/fable-mode` at the start of a coding task, or let the CLAUDE.md wiring trigger it.
-- **Workflow**: ask Claude Code to `run the fable-heavy workflow for <your task>`. It spawns ~12 agents, so expect 3–5× the tokens of a plain run — use it for large, ambiguous, or multi-file tasks only.
+- **Workflow**: ask Claude Code to `run the fable-heavy workflow for <your task>`. Cost: ~13 agents on a clean pass, 21+ when review-fix rounds fire (3–5× the tokens of a plain run) — use it for large, ambiguous, or multi-file tasks only. For critical tasks, ask for it `with bestOf: 2`: two executors implement independently in isolated worktrees and a selector picks the winner by running distinguishing tests (~1.8× extra).
+
+### Verify it's working
+
+After installing, check the skill is listed (`/plugin` for plugin installs, or ask "what skills are available?" — look for `fable-mode` or `fable-mode:fable-mode`). An active session is observable: the agent opens a task by stating in one sentence what it is about to do, reproduces failures before editing, and its final reports lead with the outcome plus what was verified (commands and results). The CLAUDE.md snippet above matches both install names.
 
 ## How the gap actually closes
 

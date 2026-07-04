@@ -15,7 +15,8 @@ const task = typeof args === 'string' ? args : args && args.task
 if (!task) throw new Error('Pass the task as args: a string, or {task: "...", context: "..."}')
 const extra = typeof args === 'object' && args && args.context ? `\nAdditional context from the user: ${args.context}` : ''
 
-const SKILL_PATH = '~/.claude/skills/fable-mode/SKILL.md'
+const SKILL_REF =
+  'FIRST: activate the fable-mode skill (it may be installed as fable-mode or fable-mode:fable-mode) and follow its loop for everything you do; if no such skill is available, read ~/.claude/skills/fable-mode/SKILL.md.'
 
 const BRIEF = {
   type: 'object',
@@ -90,17 +91,21 @@ const votes = (
     )
   )
 ).filter(Boolean)
+if (!votes.length) throw new Error('All judge agents failed — cannot rank designs')
 
 const scores = {}
 designs.forEach(d => {
   scores[d.lens] = 0
 })
 votes.forEach(v =>
-  v.ranking.forEach((lens, i) => {
+  [...new Set(v.ranking)].forEach((lens, i) => {
     if (lens in scores) scores[lens] += designs.length - i
   })
 )
-const winner = designs.slice().sort((a, b) => scores[b.lens] - scores[a.lens])[0]
+const ranked = designs.slice().sort((a, b) => scores[b.lens] - scores[a.lens])
+const winner = ranked[0]
+if (ranked[1] && scores[ranked[1].lens] === scores[winner.lens])
+  log(`judge tie between ${winner.lens} and ${ranked[1].lens} — winner picked by lens order`)
 log(`Winning approach: ${winner.lens} (scores: ${JSON.stringify(scores)})`)
 
 const PLAN = {
@@ -124,7 +129,7 @@ if (!plan) throw new Error('Plan synthesis failed')
 phase('Implement')
 const bestOf = typeof args === 'object' && args && args.bestOf === 2 ? 2 : 1
 const executorPrompt =
-  `Read ${SKILL_PATH} first and follow its loop for everything you do.\n` +
+  `${SKILL_REF}\n` +
   'Implement this plan in the repository step by step, verifying each step (run the relevant tests) before the next. ' +
   'Do NOT create git commits — leave all changes uncommitted in the working tree.\n' +
   `Task: ${task}${extra}\n` +
@@ -150,6 +155,7 @@ if (bestOf === 2) {
     )
   ).filter(Boolean)
   if (!candidates.length) throw new Error('Both executors failed')
+  if (candidates.length === 1) log('one executor failed — single candidate, no selection possible')
 
   let winning = candidates[0]
   if (candidates.length === 2) {
@@ -164,24 +170,40 @@ if (bestOf === 2) {
         `Task: ${task}\nPlan: ${JSON.stringify(plan)}\n` +
         'Select the winner by EXECUTION EVIDENCE, not code style: run the full test suite in both directories, ' +
         'then write distinguishing tests (boundaries, error paths and edge cases the plan implies but the suites may not pin) ' +
-        'and run them against BOTH candidates. Prefer the candidate with more passing evidence; break ties toward the smaller, ' +
-        'more convention-matching diff. Clean up any scratch test files you created. Return winner (A or B) and the evidence (commands + outputs that decided it).',
+        'and run them against BOTH candidates. Write those tests in a scratch directory OUTSIDE both candidates (mktemp -d) and point them at each candidate with explicit load paths — never create or leave files inside the candidate directories. ' +
+        'Prefer the candidate with more passing evidence; break ties toward the smaller, more convention-matching diff. Return winner (A or B) and the evidence (commands + outputs that decided it).',
       { label: 'select:tests', phase: 'Implement', schema: PICK }
     )
     if (pick) {
       winning = pick.winner === 'B' ? candidates[1] : candidates[0]
       log(`best-of-2 winner: ${pick.winner} — ${pick.evidence.slice(0, 120)}`)
+    } else {
+      log('select:tests failed — defaulting to candidate A without execution evidence')
     }
   }
 
+  const APPLY = {
+    type: 'object',
+    properties: {
+      applied: { type: 'boolean' },
+      filesChanged: { type: 'array', items: { type: 'string' } },
+      report: { type: 'string' },
+    },
+    required: ['applied', 'filesChanged', 'report'],
+  }
   implReport = await agent(
-    `A winning implementation exists in the worktree at ${winning.root}. Transfer it to the current repository's working tree:\n` +
-      `create a patch of ALL its changes (git -C ${winning.root} diff, plus untracked files) and apply it here — do NOT commit.\n` +
-      'Then run the relevant tests in THIS repository and confirm they pass.\n' +
+    `A winning implementation exists in the worktree at ${winning.root}. Transfer it to the current repository's working tree with exactly this procedure:\n` +
+      `1. git -C ${winning.root} add -A   (captures untracked and staged files in the patch)\n` +
+      `2. git -C ${winning.root} diff --cached --binary > <a temp file OUTSIDE both repositories>\n` +
+      '3. git apply that patch in the current repository — do NOT commit.\n' +
+      'If the patch is empty or fails to apply, return applied=false with the reason in report — do NOT run tests on an unchanged tree.\n' +
+      'On success, run the relevant tests HERE and confirm they pass.\n' +
       `The winning executor's report: ${winning.report}\n` +
-      'Return: files changed, what you verified here (commands + results), and anything left open.',
-    { label: 'apply-winner', phase: 'Implement' }
+      'Return: applied, filesChanged (paths changed in THIS repository), and report (what you verified with commands + results, anything left open).',
+    { label: 'apply-winner', phase: 'Implement', schema: APPLY }
   )
+  if (!implReport || !implReport.applied || !implReport.filesChanged.length)
+    throw new Error('best-of-2 winner transfer failed — no changes applied to the main tree')
 } else {
   implReport = await agent(
     executorPrompt + 'Return: files changed, what you verified (commands + results), and anything left open.',
@@ -225,6 +247,7 @@ for (let pass = 0; pass < 3; pass++) {
           `Adversarially review the uncommitted changes in the repository (git diff, git diff --cached, and untracked files) made for: ${task}\n` +
             `Focus: ${focus}.\n` +
             'Read the actual code and verify each suspicion before reporting it — where a suspicion is testable, prove it by running code or tests and cite the output in the issue. ' +
+            'Ignore leftover scratch test files that are clearly not part of the change. ' +
             'Report only real, confirmed issues — return an empty list if the change is clean.',
           { label: `review:${name}`, phase: 'Review', schema: FINDINGS }
         )
@@ -236,7 +259,7 @@ for (let pass = 0; pass < 3; pass++) {
   fixRounds += 1
   log(`Review pass ${pass + 1}: ${openFindings.length} findings — fixing`)
   await agent(
-    `Read ${SKILL_PATH} first and follow its loop.\n` +
+    `${SKILL_REF}\n` +
       `Fix these confirmed review findings in the repository, then prove each fix by execution: re-run the test or command that demonstrated the finding plus the relevant suite, and report the commands with their output — a fix without green output does not count as fixed:\n` +
       JSON.stringify(openFindings),
     { label: `fix:round${fixRounds}`, phase: 'Review' }

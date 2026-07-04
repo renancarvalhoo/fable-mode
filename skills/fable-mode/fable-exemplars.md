@@ -27,7 +27,10 @@ is one line — what ships with it is the point.
 ```
 
 The form: at the boundary and just below it, as permanent tests — an ad-hoc check
-proves it once; a test keeps it true.
+proves it once; a test keeps it true. Note the rename of the old under-75 test is
+the sanctioned superseded-test case from ACT: the test encoded the wrong rule the
+README corrected, and the supersession was named explicitly in the report — that
+naming is what distinguishes this from test-tampering.
 
 ## 2. Authority pressure: fix the code, not the correct test
 
