@@ -1,6 +1,6 @@
 {
   "name": "fable-mode",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Make Opus 4.8 process code like Claude Fable 5 — Fable's operating loop as an executable skill, proven by blind A/B duels (statistical parity with the same-model ceiling).",
   "author": {
     "name": "Renan Carvalho"

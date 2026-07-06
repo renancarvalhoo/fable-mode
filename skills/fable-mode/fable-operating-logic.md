@@ -104,6 +104,16 @@ What changes with task size is the depth of each stage, never whether it happens
   proven only by the old single-warehouse tests; live Fable added Order-level tests
   that split a reservation across warehouses. Old tests staying green proves the old
   path, not the claim.
+- A read-only task changes nothing, but that is not the same as running nothing. When
+  the question is about runtime behavior and the code is runnable, run it read-only and
+  cite the observed output — an executed observation beats asserted knowledge of what the
+  code "would" do. Round-4 evidence (non-runnable regime, n3): asked why same-day CSV rows
+  reorder, the scaffolded side ran the export and cited the exact rows that shuffle and the
+  ones that do not, directly answering the user's "sometimes"; the unscaffolded side read
+  the code, correctly named the unstable `sort_by`, but asserted the behavior without
+  running it — and the blind judge scored that the weaker process for a runtime claim
+  (27 vs 30). Where nothing is runnable, ground every claim in code actually read, cited
+  as `path:line`.
 - Partial result is reported as partial: "2 of 3 pass, the third fails because…" —
   never rounded up to done. The mirror rule: a verified success is stated plainly,
   without hedging — "should work now" after green output undersells the evidence.
@@ -198,6 +208,27 @@ iterations, the remaining Fable/Opus+skill difference is statistically
 indistinguishable from Fable's own run-to-run variance. The one residual gap found
 (compatibility claims proven only through old tests) became the VERIFY
 new-behavior rule above.
+
+Round-4 non-runnable-regime duel (2026-07-06, skill v4, three scenarios purpose-built
+to have no test suite and no obvious verification command — the exact regime the v4
+audit added rules for: a docs-only fix with three stale seams and a decoy, a false-lead
+bug in a project with no tests, and a read-only runtime question). Compared Opus 4.8 +
+skill against BARE Fable (explicitly told to use no skills). Opus+skill took all three by
+narrow margins (30-vs-29 twice, 30-vs-27 once), every one decided on process — verification
+and report quality — never on the core answer: n1 produced byte-identical diffs, n2
+byte-identical CSV output, n3 the same correct root cause. Honest caveats, stated so the
+result is not overclaimed: (1) the control is bare Fable, so this measures the explicit
+process scaffold against an unscaffolded frontier model, which is the skill's stated
+purpose (consistency insurance on process) and NOT a capability comparison; (2) n2 was
+judged on Opus because Fable credits ran out mid-round, while n1/n3 were judged on Fable —
+a pro-Opus judge bias on that one scenario cannot be fully excluded, though the judge gave
+independently reproduced reasons (an empty-input crash the losing fix introduced, two extra
+verified bugs the winning report flagged); (3) n=1 per scenario on a single new fixture.
+The one gap surfaced: the v4 read-only VERIFY rule said such tasks "run nothing", but the
+winning n3 side RAN the read-only export and cited observed reordering while bare Fable
+read the code and asserted the behavior — and lost exactly there. That over-absolute
+"run nothing" was corrected to the run-it-read-only rule above, mirroring the same
+over-absolute-command fix the v4 audit applied to the write path.
 
 ## Why this works, per the literature (verified 2026-07)
 

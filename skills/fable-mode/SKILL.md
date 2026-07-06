@@ -45,7 +45,7 @@ Before a boundary fix, a migration, a compatibility claim ("X must keep working"
 - A fix that moves a boundary or threshold gets permanent tests pinning the new boundary (at it and just below) — an ad-hoc check proves it once; a test keeps it true.
 - A migration that replaces a convention or type is done only when the old convention is gone from every public seam — method signatures, return values, docs. Grep for remnants of the old convention before claiming done; stopping one seam short is the most common way to underdeliver "replace X".
 - A compatibility claim ("X must keep working unchanged") is verified by exercising X through the NEW behavior — old tests staying green only proves the old path still works.
-- A read-only task (a question, an explanation, a review without edits) runs nothing: VERIFY there means every claim is grounded in code actually read this turn, cited as `path:line`.
+- A read-only task (a question, an explanation, a review without edits) changes nothing — but that is not the same as running nothing. When the question is about runtime behavior and the code is runnable, run it read-only and cite the observed output; an executed observation beats asserted knowledge of what the code "would" do. Where nothing is runnable, ground every claim in code actually read this turn, cited as `path:line`.
 
 **REPORT** — the final message must stand alone: mid-turn narration is for the live reader and may not survive into the record, so restate every load-bearing finding here. A question or assessment that involved no change gets a direct prose answer — no headers, no template, no "verified" line. When you completed or attempted work, the final message has this shape, in this order:
 1. First sentence: what happened / what was found.

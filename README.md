@@ -15,17 +15,18 @@ Same task, byte-identical copies of the same project, planted traps (false leads
 
 On the harder task, **Opus + fable-mode ended up more similar to Fable than Fable is to itself** (parity 80 vs ceiling 75). And in the m1 duel the blind judge handed the win to *Opus over live Fable* — precisely on a rule this skill added (naming judgment calls where the spec is silent), plus a self-correction the judge singled out: it caught and strengthened its own weakened assertion instead of shipping it. The student out-applied the textbook.
 
-### Scoreboard (9 blind duels, 4 iterations of the skill)
+### Scoreboard (12 blind duels, 5 iterations of the skill)
 
 | Round | Scenarios | Similarity | Verdicts |
 |---|---|---|---|
 | 1 — short traps | s1–s5 | 88–99 (byte-identical diffs on s1–s3) | 4 ties, 1 marginal Fable win |
 | 2 — long-horizon, tier 9–10 | l1–l2 | 88 / 88 | 2 marginal Fable wins |
 | 3 — with skill v3 + same-model control | m1–m2 | parity 90 / 80 vs **ceiling 97 / 75** | 1 Opus win, 1 Fable win |
+| 4 — non-runnable regime, skill v4 (Opus+skill vs bare Fable) | n1–n3 | 93 / 72 / 70 | 3 marginal Opus+skill wins, all on process |
 
 Mean parity **85** vs mean same-model ceiling **86**. Every win, in both directions, was by a marginal call — never a gross failure. All 7 round-1/2 scenarios passed a double adversarial audit (Sonnet auditors, then Fable 5 auditors instructed to refute everything): traps valid and identical in both copies, all verdicts standing; 11 minor nits (including one small overstatement in a Fable report and one discarded harness-artifact run), 0 conclusion-changing findings.
 
-Honest scope: these are our internal evaluations on a single Ruby fixture — a reproducible method, not a third-party benchmark; the duel artifacts (fixture, scenario bank, diffs, judge verdicts) are not yet published. The m2 ceiling reading is a single control pairing (n=1) — a variance signal, not a precise ceiling. The operating loop is language-agnostic, but the taste catalog and all measured evidence are Ruby-only so far; taste files for other languages are welcome contributions.
+Honest scope: these are our internal evaluations on two small Ruby fixtures — a reproducible method, not a third-party benchmark; the duel artifacts (fixtures, scenario bank, diffs, judge verdicts) are not yet published. Each cell is n=1: the m2 ceiling reading is a single control pairing, and round 4's three scenarios are one run each. Round 4 also carries two caveats of its own — its control is *bare* Fable (told to use no skills), so it measures the explicit process scaffold against an unscaffolded frontier model rather than a capability gap; and one of its three scenarios was judged on Opus rather than Fable because Fable credits ran out mid-round. The operating loop is language-agnostic, but the taste catalog and all measured evidence are Ruby-only so far; taste files for other languages are welcome contributions.
 
 ## What's inside
 
@@ -85,16 +86,17 @@ Every gap a blind judge found became a rule in the skill's core loop — duel �
 - **v3** — round 2's findings: a convention migration ends only when the old convention is gone from *every public seam* (grep the remnants); reports name every judgment call made where the spec was silent (a blanket "nothing left open" is overclaiming); a test superseded by a new requirement is updated *with the supersession named*, never silently.
 - **v3.1** — round 3's last real gap: a compatibility claim ("X must keep working") is proven by exercising X through the *new* behavior — old tests staying green only proves the old path.
 - **v4** — four-specialist audit + a second first-hand fidelity pass: graceful degradation when nothing is runnable (docs-only edits, read-only questions, frontend changes get an evidence standard instead of a mandatory command), denied permissions treated as an answer rather than retried, brevity-by-selection in reports, mid-task user requests get a defined re-entry path, and a no-subagent fallback for the final review. `fable-heavy` hardened: clean-tree preflight (a dirty tree used to contaminate the review and could mask a failed best-of-2 apply), plugin-aware skill fallback, prompt clipping, and the final review pass no longer discards applied work if all reviewers fail.
+- **v4.1** — round 4 ran the v4 rules through their own regime: three scenarios built to have *no* runnable check (a docs-only fix, a false-lead bug with no test suite, a read-only runtime question). The one gap it surfaced: the v4 read-only rule said such tasks "run nothing", but the winning side *ran* the read-only command (exporting the CSV to observe the real reordering) while the side that only read the code lost precisely there. Fixed: a read-only question about runtime behavior is verified by running it read-only and citing the observed output — executed observation beats asserted knowledge.
 
 What doesn't close: the intrinsic quality of a single reasoning step. That's what `fable-heavy` is for — on big tasks, no critical decision ever depends on one reasoning step (3 independent designs, judge panel, adversarial reviewers).
 
 ## References
 
 - **Methodology**: byte-identical project copies under git; planted traps verified in the baseline commit; blind judges (never told which agent is which model) with A/B positions alternated per scenario; judges inspect `git diff` and run the suite themselves; round 3 adds a same-model control duel (Fable × Fable) so parity is measured against the real ceiling, not against 100.
-- **Scenario bank**: 9 scenarios over a Ruby fixture ("MiniStore", 16-test green suite) — false-lead debugging under time pressure, hidden-caller rename, authority pressure to edit a correct test, spec/test conflict, multi-file feature, whole-codebase Money migration, lifecycle redesign with an embedded superseded test, Item value-object migration, multi-warehouse atomic reservations.
+- **Scenario bank**: 9 scenarios over the "MiniStore" fixture (16-test green suite) — false-lead debugging under time pressure, hidden-caller rename, authority pressure to edit a correct test, spec/test conflict, multi-file feature, whole-codebase Money migration, lifecycle redesign with an embedded superseded test, Item value-object migration, multi-warehouse atomic reservations. Round 4 adds 3 scenarios over a second fixture ("shiplog", a CSV exporter with *no* test suite) built for the non-runnable regime: a docs-only fix with three stale seams and a word-count decoy, a false-lead bug the user misattributes to the wrong file, and a read-only runtime question.
 - **Judging rubric**: six process dimensions (root cause, verification, honesty, completeness, trap resistance, report format, 0–5 each) + a 0–100 similarity index + verdict.
 - **Audit**: every scenario and every final report double-audited adversarially (Sonnet pass, then Fable 5 pass instructed to *refute*) — scenario validity, report-vs-reality accuracy, judge defensibility.
-- **Scale**: 51 subagents, ~1.74M tokens across the four executions (rounds 1–3 + the Fable audit pass).
+- **Scale**: 51 subagents, ~1.74M tokens across rounds 1–3 plus the Fable audit pass; round 4 added 6 duelists and 3 blind judges over a second fixture.
 - **Baseline honesty**: on short well-scoped tasks, Opus 4.8 + the Claude Code harness already behaves Fable-like even without the skill (it passed all the pre-skill pressure tests); with the skill, the round-1 duels produced byte-identical diffs on s1–s3. The skill's value is consistency insurance on long, ambiguous, context-degraded work — which is exactly where the judged gaps appeared, and where the rules closed them.
 
 ## License
