@@ -66,7 +66,7 @@ Then wire it in your `~/.claude/CLAUDE.md` so it activates automatically:
 - When running on any model other than Fable (Opus, Sonnet, Haiku), invoke the `fable-mode` skill at the start of any coding task and follow its loop
 ```
 
-For the heavy pipeline, copy `workflows/fable-heavy.js` into your project's `.claude/workflows/` — this currently requires cloning the repo even if you installed the skill as a plugin. Its executor and fixer agents activate the fable-mode skill by name (either install works). Prerequisite: a Claude Code version with the Workflows feature (script orchestration — check that `/workflows` exists in your CLI).
+For the heavy pipeline, `./install.sh` also copies `workflows/fable-heavy.js` to `~/.claude/workflows/`; to pin it per project, copy it into the project's `.claude/workflows/` instead. Getting the workflow currently requires cloning the repo even if you installed the skill as a plugin. Its executor and fixer agents activate the fable-mode skill by name (either install works). Prerequisite: a Claude Code version with the Workflows feature (script orchestration — check that `/workflows` exists in your CLI).
 
 ## Usage
 
@@ -84,6 +84,7 @@ Every gap a blind judge found became a rule in the skill's core loop — duel �
 - **v2** — first-hand validation against live Fable 5's contract: mid-task narration, outward-facing actions require confirmation, turn-ending persistence, verified success stated without hedging. Plus round 1's finding: a fix that moves a threshold gets permanent boundary-pinning tests.
 - **v3** — round 2's findings: a convention migration ends only when the old convention is gone from *every public seam* (grep the remnants); reports name every judgment call made where the spec was silent (a blanket "nothing left open" is overclaiming); a test superseded by a new requirement is updated *with the supersession named*, never silently.
 - **v3.1** — round 3's last real gap: a compatibility claim ("X must keep working") is proven by exercising X through the *new* behavior — old tests staying green only proves the old path.
+- **v4** — four-specialist audit + a second first-hand fidelity pass: graceful degradation when nothing is runnable (docs-only edits, read-only questions, frontend changes get an evidence standard instead of a mandatory command), denied permissions treated as an answer rather than retried, brevity-by-selection in reports, mid-task user requests get a defined re-entry path, and a no-subagent fallback for the final review. `fable-heavy` hardened: clean-tree preflight (a dirty tree used to contaminate the review and could mask a failed best-of-2 apply), plugin-aware skill fallback, prompt clipping, and the final review pass no longer discards applied work if all reviewers fail.
 
 What doesn't close: the intrinsic quality of a single reasoning step. That's what `fable-heavy` is for — on big tasks, no critical decision ever depends on one reasoning step (3 independent designs, judge panel, adversarial reviewers).
 

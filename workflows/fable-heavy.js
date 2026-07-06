@@ -3,7 +3,7 @@ export const meta = {
   description: 'Best-of-3 design, judged synthesis, disciplined implementation and execution-grounded adversarial review for big tasks on non-Fable models',
   whenToUse: 'Large, ambiguous or multi-file coding tasks on Opus/Sonnet where single-pass judgment is not enough. Pass {task: "...", bestOf: 2} to have two executors implement independently with test-based selection of the winner (~1.8x cost, for critical tasks).',
   phases: [
-    { title: 'Understand', detail: 'scout the codebase for context' },
+    { title: 'Understand', detail: 'clean-tree preflight, then scout the codebase for context' },
     { title: 'Design', detail: '3 independent approaches from different lenses' },
     { title: 'Judge', detail: 'panel ranks approaches, synthesize winning plan' },
     { title: 'Implement', detail: 'execute the plan following the fable-mode loop; optional best-of-2 with execution-grounded selection' },
@@ -16,7 +16,12 @@ if (!task) throw new Error('Pass the task as args: a string, or {task: "...", co
 const extra = typeof args === 'object' && args && args.context ? `\nAdditional context from the user: ${args.context}` : ''
 
 const SKILL_REF =
-  'FIRST: activate the fable-mode skill (it may be installed as fable-mode or fable-mode:fable-mode) and follow its loop for everything you do; if no such skill is available, read ~/.claude/skills/fable-mode/SKILL.md.'
+  'FIRST: activate the fable-mode skill (it may be installed as fable-mode or fable-mode:fable-mode) and follow its loop for everything you do; if no such skill is available, locate its SKILL.md — run `ls ~/.claude/skills/fable-mode/SKILL.md ~/.claude/plugins/*/skills/fable-mode/SKILL.md ~/.claude/plugins/*/*/skills/fable-mode/SKILL.md 2>/dev/null` — and read the first hit.'
+
+const clip = (v, n) => {
+  const s = JSON.stringify(v)
+  return s.length > n ? s.slice(0, n) + '…[truncated]' : s
+}
 
 const BRIEF = {
   type: 'object',
@@ -30,6 +35,14 @@ const BRIEF = {
 }
 
 phase('Understand')
+const preflight = await agent(
+  'Run `git status --porcelain` in the current repository (read-only, modify nothing) and return its output verbatim — an empty string if the tree is clean.',
+  { label: 'preflight', schema: { type: 'object', properties: { porcelain: { type: 'string' } }, required: ['porcelain'] } }
+)
+if (preflight && preflight.porcelain.trim())
+  throw new Error('fable-heavy needs a clean working tree — commit or stash first. git status --porcelain reported:\n' + preflight.porcelain)
+if (!preflight) log('preflight tree check failed — proceeding without a clean-tree guarantee')
+
 const brief = (await agent(
   `Scout the current repository to prepare for this task: ${task}${extra}\n` +
     'Read the relevant code (do NOT modify anything). Return: a summary of how the affected area works today, ' +
@@ -53,13 +66,13 @@ const APPROACH = {
   },
   required: ['lens', 'approach', 'steps', 'tradeoffs'],
 }
-const designs = (
+const rawDesigns = (
   await parallel(
     LENSES.map(([lens, angle]) => () =>
       agent(
         `Design an implementation approach for this task through the ${lens} lens (${angle}).\n` +
           `Task: ${task}${extra}\n` +
-          `Codebase brief: ${JSON.stringify(brief)}\n` +
+          `Codebase brief: ${clip(brief, 4000)}\n` +
           'Read any code you need (do NOT modify). Return your lens name exactly as given, the approach, ' +
           'concrete ordered steps (files + what changes in each), and the tradeoffs.',
         { label: `design:${lens}`, phase: 'Design', schema: APPROACH }
@@ -67,6 +80,9 @@ const designs = (
     )
   )
 ).filter(Boolean)
+const seenLens = new Set()
+const designs = rawDesigns.filter(d => !seenLens.has(d.lens) && seenLens.add(d.lens))
+if (rawDesigns.length > designs.length) log('duplicate lens returned by a design agent — kept the first of each')
 if (!designs.length) throw new Error('All design agents failed — nothing to judge')
 
 phase('Judge')
@@ -84,7 +100,7 @@ const votes = (
       agent(
         `You are judging ${designs.length} implementation approaches for: ${task}\n` +
           `Judge PRIMARILY by ${criterion}. You may read the code to check claims.\n` +
-          `Approaches: ${JSON.stringify(designs)}\n` +
+          `Approaches: ${clip(designs, 9000)}\n` +
           `Return a ranking of lens names (best first) and your reasoning. Valid lens names — echo them EXACTLY: ${designs.map(d => d.lens).join(', ')}.`,
         { label: `judge:${criterion}`, phase: 'Judge', schema: VERDICT }
       )
@@ -120,9 +136,9 @@ const PLAN = {
 }
 const plan = await agent(
   `Synthesize the final implementation plan for: ${task}\n` +
-    `Base it on the winning approach (${winner.lens}): ${JSON.stringify(winner)}\n` +
-    `Graft in clearly superior ideas from the runners-up: ${JSON.stringify(designs.filter(d => d !== winner))}\n` +
-    `Judges' reasoning: ${JSON.stringify(votes.map(v => v.reasoning))}\n` +
+    `Base it on the winning approach (${winner.lens}): ${clip(winner, 5000)}\n` +
+    `Graft in clearly superior ideas from the runners-up: ${clip(designs.filter(d => d !== winner), 6000)}\n` +
+    `Judges' reasoning: ${clip(votes.map(v => v.reasoning), 3000)}\n` +
     'Return the plan narrative and concrete ordered steps.',
   { label: 'synthesize', phase: 'Judge', schema: PLAN }
 )
@@ -135,8 +151,8 @@ const executorPrompt =
   'Implement this plan in the repository step by step, verifying each step (run the relevant tests) before the next. ' +
   'Do NOT create git commits — leave all changes uncommitted in the working tree.\n' +
   `Task: ${task}${extra}\n` +
-  `Plan: ${JSON.stringify(plan)}\n` +
-  `Codebase brief: ${JSON.stringify(brief)}\n`
+  `Plan: ${clip(plan, 6000)}\n` +
+  `Codebase brief: ${clip(brief, 4000)}\n`
 
 let implReport
 if (bestOf === 2) {
@@ -169,7 +185,7 @@ if (bestOf === 2) {
     const pick = await agent(
       `Two independent implementations of the same plan exist in two directories.\n` +
         `Candidate A: ${candidates[0].root}\nCandidate B: ${candidates[1].root}\n` +
-        `Task: ${task}\nPlan: ${JSON.stringify(plan)}\n` +
+        `Task: ${task}\nPlan: ${clip(plan, 6000)}\n` +
         'Select the winner by EXECUTION EVIDENCE, not code style: run the full test suite in both directories, ' +
         'then write distinguishing tests (boundaries, error paths and edge cases the plan implies but the suites may not pin) ' +
         'and run them against BOTH candidates. Write those tests in a scratch directory OUTSIDE both candidates (mktemp -d) and point them at each candidate with explicit load paths — never create or leave files inside the candidate directories. ' +
@@ -257,6 +273,7 @@ const REVIEWERS = [
 
 let openFindings = []
 let fixRounds = 0
+let reviewIncomplete = false
 for (let pass = 0; pass < 3; pass++) {
   const reviews = (
     await parallel(
@@ -272,7 +289,12 @@ for (let pass = 0; pass < 3; pass++) {
       )
     )
   ).filter(Boolean)
-  if (!reviews.length) throw new Error('All review agents failed — the change is unreviewed, not clean')
+  if (!reviews.length) {
+    if (pass === 0) throw new Error('All review agents failed — the change is unreviewed, not clean')
+    reviewIncomplete = true
+    log(`review pass ${pass + 1} failed entirely — the last fix round is unverified; returning what is known`)
+    break
+  }
   openFindings = reviews.flatMap(r => r.findings)
   if (openFindings.length === 0 || pass === 2) break
   fixRounds += 1
@@ -280,7 +302,7 @@ for (let pass = 0; pass < 3; pass++) {
   await agent(
     `${SKILL_REF}\n` +
       `Fix these confirmed review findings in the repository, then prove each fix by execution: re-run the test or command that demonstrated the finding plus the relevant suite, and report the commands with their output — a fix without green output does not count as fixed:\n` +
-      JSON.stringify(openFindings),
+      clip(openFindings, 8000),
     { label: `fix:round${fixRounds}`, phase: 'Review' }
   )
 }
@@ -291,4 +313,5 @@ return {
   implementation: implReport,
   fixRounds,
   unresolvedFindings: openFindings,
+  reviewIncomplete,
 }

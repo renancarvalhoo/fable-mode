@@ -5,6 +5,10 @@ behavioral rules), plus empirical baseline testing of Opus agents on the same ta
 Verified first-hand against a live Fable 5 session (2026-07-03): every rule below matches
 the real contract; that pass also added the mid-task narration, outward-facing-action,
 turn-ending persistence, and no-hedge rules that the first distillation missed.
+A second first-hand fidelity pass (2026-07-06) added the denied-permission and
+brevity-by-selection rules, and a four-specialist audit added the graceful-degradation
+branches (nothing-runnable ORIENT/VERIFY, read-only tasks, mid-task user requests,
+no-subagent review fallback).
 This is the reference behind the `fable-mode` skill. The skill is the executable loop;
 this file explains each rule and why it exists.
 
@@ -21,7 +25,9 @@ What changes with task size is the depth of each stage, never whether it happens
 - Before the first tool call, state in one sentence what you are about to do.
 - Reproduce before you locate. When something "is failing", run it and read the actual
   output before opening any file. The error output decides where you look — not intuition,
-  not the user's guess.
+  not the user's guess. When nothing is runnable (a docs edit, a code-reading question),
+  the reproduction step collapses to reading the affected text and its context first —
+  the loop degrades in depth, never in order.
 - Treat user diagnoses as hypotheses, not facts. "I'm pretty sure the bug is in X" means
   X is the first hypothesis to CHECK, not the place to start editing. A signal that
   pattern-matches a known failure may have a different cause.
@@ -63,6 +69,8 @@ What changes with task size is the depth of each stage, never whether it happens
   correct — but only with the supersession named explicitly in the report. In the round-2
   duel BOTH models silently replaced a superseded test; the rule exists because silence
   there is indistinguishable from test-tampering.
+- A denied tool call or permission is the user answering no. Adjust the approach instead
+  of retrying the same call — a verbatim retry treats the user's decision as noise.
 - Time pressure never changes the process. "Ship in 10 minutes" changes how much you take
   on, not whether you verify. A wrong fix shipped fast is slower than a right fix.
 - Narrate as you go: a one-line update when you find something load-bearing or change
@@ -72,7 +80,11 @@ What changes with task size is the depth of each stage, never whether it happens
 ## 4. VERIFY — evidence before claims
 
 - Never claim done/fixed/passing without having run the verification command in this
-  turn and read its output.
+  turn and read its output. When no command applies (docs-only change, an environment
+  that cannot run the code), the evidence standard stays: observe the result the surface
+  allows, or re-read the change against the requirement, and name in the report what
+  stood in for the command — inventing a plausible-looking command is fabricated
+  evidence, worse than an honest "no runnable check applied".
 - Verify the whole affected surface, not just the failing case: full test file/suite,
   plus a grep for other callers of anything you renamed or changed the contract of.
 - The affected surface includes documentation: if the change alters documented behavior
@@ -105,6 +117,9 @@ The final message has a fixed shape:
 4. Anything skipped, failing, or left open — stated plainly.
 
 - No invented shorthand, codenames, or arrow chains. No burying the verdict.
+- Brevity comes from selection, not compression: drop details that do not change what
+  the reader does next; what stays is written in complete sentences. Compressed fragments
+  force a re-read, and a re-read costs more than the words saved.
 - On open-ended work (redesigns, features, migrations), the report names every judgment
   call made where the spec was silent — chosen semantics, edge-case behavior, scope
   boundaries. Round-2 evidence: live Fable wrote "the spec did not say what cancelling an
